@@ -89,6 +89,19 @@ export default function PaymentPage() {
       });
 
       navigate("/booking-success", {
+  state: {
+    user_name: loggedInUser.name,
+    user_email: loggedInUser.email,
+    eventTitle: bookingData.eventTitle,
+    quantity: bookingData.quantity,
+    ticketCode: result.ticketCode || "",
+    qrCode: result.qrCode || "",
+    amount: totalAmount,
+    event_id: bookingData.event_id,
+  },
+});
+
+      navigate("/booking-success", {
         state: {
           user_name: loggedInUser.name,
           user_email: loggedInUser.email,
