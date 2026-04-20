@@ -193,10 +193,10 @@ export default function BrowseEventsPage() {
               <section ref={resultsRef}>
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-                    Filtered Results
+                    Matching Events
                   </h2>
                   <p className="mt-2 text-slate-600">
-                    Matching events are shown here based on your search and selected filters.
+                    {/* Matching events based on your search and selected filters. */}
                   </p>
                 </div>
 
@@ -220,7 +220,7 @@ export default function BrowseEventsPage() {
                       Browse Events
                     </h2>
                     <p className="mt-2 text-slate-600">
-                      Explore one highlighted event from each category.
+                      {/* Explore one highlighted event from each category. */}
                     </p>
                   </div>
 
@@ -237,7 +237,7 @@ export default function BrowseEventsPage() {
                       Featured Events
                     </h2>
                     <p className="mt-2 text-slate-600">
-                      Handpicked events highlighted on the homepage.
+                      {/* Handpicked events highlighted on the homepage. */}
                     </p>
                   </div>
 
@@ -254,7 +254,7 @@ export default function BrowseEventsPage() {
                       Trending Now
                     </h2>
                     <p className="mt-2 text-slate-600">
-                      Popular and highlighted events users are likely to explore.
+                      {/* Popular and highlighted events users are likely to explore. */}
                     </p>
                   </div>
 
