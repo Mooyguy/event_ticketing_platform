@@ -4,13 +4,12 @@ import {
   getAllBookings,
   getBookingsByUser,
 } from "../controllers/bookingController.js";
-import { authenticateToken } from "../middleware/authMiddleware.js";
-import { validateBooking } from "../middleware/validateMiddleware.js";
+import { authenticateToken, requireAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", authenticateToken, getAllBookings);
+router.get("/", authenticateToken, requireAdmin, getAllBookings);
 router.get("/user/:userId", authenticateToken, getBookingsByUser);
-router.post("/", authenticateToken, validateBooking, createBooking);
+router.post("/", authenticateToken, createBooking);
 
 export default router;

@@ -17,17 +17,22 @@ export const getAllEvents = async (req, res) => {
         description,
         seats_left AS seatsLeft
       FROM events
-      ORDER BY event_date ASC, event_time ASC
+      ORDER BY event_date ASC
     `);
 
-    res.status(200).json(rows);
+    res.json(rows);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch events", error: error.message });
+    res.status(500).json({
+      message: "Failed to fetch events",
+      error: error.message,
+    });
   }
 };
 
 export const getEventById = async (req, res) => {
   try {
+    const { id } = req.params;
+
     const [rows] = await pool.query(
       `
       SELECT
@@ -46,16 +51,19 @@ export const getEventById = async (req, res) => {
       FROM events
       WHERE id = ?
       `,
-      [req.params.id]
+      [id]
     );
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    res.status(200).json(rows[0]);
+    res.json(rows[0]);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch event", error: error.message });
+    res.status(500).json({
+      message: "Failed to fetch event",
+      error: error.message,
+    });
   }
 };
 
@@ -90,8 +98,8 @@ export const createEvent = async (req, res) => {
         location,
         price,
         status || "Available",
-        image,
-        description,
+        image || null,
+        description || null,
         seats_left,
       ]
     );
@@ -101,12 +109,16 @@ export const createEvent = async (req, res) => {
       id: result.insertId,
     });
   } catch (error) {
-    res.status(500).json({ message: "Failed to create event", error: error.message });
+    res.status(500).json({
+      message: "Failed to create event",
+      error: error.message,
+    });
   }
 };
 
 export const updateEvent = async (req, res) => {
   try {
+    const { id } = req.params;
     const {
       title,
       category,
@@ -124,8 +136,18 @@ export const updateEvent = async (req, res) => {
     const [result] = await pool.query(
       `
       UPDATE events
-      SET title = ?, category = ?, event_date = ?, event_time = ?, venue = ?, location = ?,
-          price = ?, status = ?, image = ?, description = ?, seats_left = ?
+      SET
+        title = ?,
+        category = ?,
+        event_date = ?,
+        event_time = ?,
+        venue = ?,
+        location = ?,
+        price = ?,
+        status = ?,
+        image = ?,
+        description = ?,
+        seats_left = ?
       WHERE id = ?
       `,
       [
@@ -137,10 +159,10 @@ export const updateEvent = async (req, res) => {
         location,
         price,
         status,
-        image,
-        description,
+        image || null,
+        description || null,
         seats_left,
-        req.params.id,
+        id,
       ]
     );
 
@@ -148,24 +170,44 @@ export const updateEvent = async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    res.status(200).json({ message: "Event updated successfully" });
+    res.json({ message: "Event updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Failed to update event", error: error.message });
+    res.status(500).json({
+      message: "Failed to update event",
+      error: error.message,
+    });
   }
 };
 
 export const deleteEvent = async (req, res) => {
   try {
-    const [result] = await pool.query("DELETE FROM events WHERE id = ?", [
-      req.params.id,
-    ]);
+    const { id } = req.params;
+
+    const [bookings] = await pool.query(
+      "SELECT id FROM bookings WHERE event_id = ? LIMIT 1",
+      [id]
+    );
+
+    if (bookings.length > 0) {
+      return res.status(400).json({
+        message: "Cannot delete event with existing bookings",
+      });
+    }
+
+    const [result] = await pool.query(
+      "DELETE FROM events WHERE id = ?",
+      [id]
+    );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    res.status(200).json({ message: "Event deleted successfully" });
+    res.json({ message: "Event deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete event", error: error.message });
+    res.status(500).json({
+      message: "Failed to delete event",
+      error: error.message,
+    });
   }
 };

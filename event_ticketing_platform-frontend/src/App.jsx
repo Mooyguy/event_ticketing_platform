@@ -18,6 +18,8 @@ import AdminEditEventPage from "./pages/AdminEditEventPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import PaymentPage from "./pages/PaymentPage";
 
+import AdminUsersPage from "./pages/AdminUsersPage";
+
 export default function App() {
   return (
     <div className="flex min-h-screen flex-col bg-slate-100 text-slate-900">
@@ -51,6 +53,15 @@ export default function App() {
           />
 
           <Route
+  path="/admin/events"
+  element={
+    <ProtectedRoute requireAdmin={true}>
+      <AdminEventsPage />
+    </ProtectedRoute>
+  }
+/>
+
+          <Route
             path="/admin/analytics"
             element={
               <ProtectedRoute requireAdmin={true}>
@@ -76,6 +87,15 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+  path="/admin/users"
+  element={
+    <ProtectedRoute requireAdmin={true}>
+      <AdminUsersPage />
+    </ProtectedRoute>
+  }
+/>
 
 <Route
   path="/payment"

@@ -11,27 +11,24 @@ export const createBooking = async (req, res) => {
         message: "Missing required booking fields",
       });
     }
-    // Check for existing booking
+
+    if (Number(req.user.id) !== Number(user_id) && req.user.role !== "admin") {
+      return res.status(403).json({
+        message: "You cannot create a booking for another user",
+      });
+    }
+
     const [existingBookings] = await pool.query(
-  "SELECT id FROM bookings WHERE user_id = ? AND event_id = ?",
-  [user_id, event_id]
-);
+      "SELECT id FROM bookings WHERE user_id = ? AND event_id = ?",
+      [user_id, event_id]
+    );
 
-if (existingBookings.length > 0) {
-  return res.status(409).json({
-    message: "You have already booked this event",
-  });
-}
-    // const [existing] = await pool.query(
-    //   "SELECT * FROM bookings WHERE user_id = ? AND event_id = ?",
-    //   [userId, eventId]
-    // );
+    if (existingBookings.length > 0) {
+      return res.status(409).json({
+        message: "You have already booked this event",
+      });
+    }
 
-    // if (existing.length > 0) {
-    //   return res.status(400).json({
-    //     message: "You have already booked this event",
-    //   });
-    // }
     const [eventRows] = await pool.query(
       "SELECT * FROM events WHERE id = ?",
       [event_id]
@@ -50,7 +47,6 @@ if (existingBookings.length > 0) {
     }
 
     const ticketCode = generateTicketCode();
-
     const qrData = `Ticket:${ticketCode}|Event:${event.title}|User:${user_email}`;
     const qrCode = await QRCode.toDataURL(qrData);
 
@@ -66,7 +62,7 @@ if (existingBookings.length > 0) {
     );
 
     res.status(201).json({
-      message: "Booking successful 🎉",
+      message: "Booking successful",
       bookingId: result.insertId,
       ticketCode,
       qrCode,
@@ -112,6 +108,12 @@ export const getAllBookings = async (req, res) => {
 export const getBookingsByUser = async (req, res) => {
   try {
     const { userId } = req.params;
+
+    if (Number(req.user.id) !== Number(userId) && req.user.role !== "admin") {
+      return res.status(403).json({
+        message: "You are not allowed to view these bookings",
+      });
+    }
 
     const [rows] = await pool.query(
       `

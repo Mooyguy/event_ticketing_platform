@@ -5,6 +5,7 @@ import CategoryPills from "../components/ui/CategoryPills";
 import EventCard from "../components/ui/EventCard";
 import HeroSlider from "../components/ui/HeroSlider";
 import { fetchAllEvents } from "../services/eventService";
+import { searchExternalEvents } from "../services/externalEventService";
 
 const categories = [
   "All Events",
@@ -27,7 +28,9 @@ export default function BrowseEventsPage() {
   const [searchText, setSearchText] = useState("");
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [events, setEvents] = useState([]);
+  const [externalEvents, setExternalEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingExternal, setLoadingExternal] = useState(false);
   const [error, setError] = useState("");
   const resultsRef = useRef(null);
 
@@ -47,6 +50,29 @@ export default function BrowseEventsPage() {
 
     loadEvents();
   }, []);
+
+  useEffect(() => {
+    const runExternalSearch = async () => {
+      if (!searchText.trim()) {
+        setExternalEvents([]);
+        return;
+      }
+
+      try {
+        setLoadingExternal(true);
+        const data = await searchExternalEvents(searchText);
+        setExternalEvents(data);
+      } catch (err) {
+        console.error("External search failed:", err);
+        setExternalEvents([]);
+      } finally {
+        setLoadingExternal(false);
+      }
+    };
+
+    const timer = setTimeout(runExternalSearch, 500);
+    return () => clearTimeout(timer);
+  }, [searchText]);
 
   const cities = useMemo(() => {
     const uniqueCities = [
@@ -189,11 +215,40 @@ export default function BrowseEventsPage() {
 
         {!loading && !error && (
           <>
-            {hasActiveFilters ? (
-              <section ref={resultsRef}>
+            {searchText.trim() && (
+              <section ref={resultsRef} className="mb-12">
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-                    Matching Events
+                    🌍 Worldwide Events
+                  </h2>
+                  <p className="mt-2 text-slate-600">
+                    Live results from Ticketmaster (global events)
+                  </p>
+                </div>
+
+                {loadingExternal ? (
+                  <div className="rounded-[24px] bg-white p-6 text-center shadow-lg">
+                    Loading worldwide events...
+                  </div>
+                ) : externalEvents.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                    {externalEvents.map((event) => (
+                      <EventCard key={event.id} event={event} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-[24px] bg-white p-6 text-center shadow-lg">
+                    {/* No worldwide events found. */}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {hasActiveFilters ? (
+              <section>
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+                    Local Matching Events
                   </h2>
                   <p className="mt-2 text-slate-600">
                     {/* Matching events based on your search and selected filters. */}
@@ -254,7 +309,7 @@ export default function BrowseEventsPage() {
                       Trending Now
                     </h2>
                     <p className="mt-2 text-slate-600">
-                      {/* Popular and highlighted events users are likely to explore. */}
+                      Popular and highlighted events for you.
                     </p>
                   </div>
 

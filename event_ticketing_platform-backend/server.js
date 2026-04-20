@@ -9,6 +9,10 @@ import authRoutes from "./routes/authRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import { apiLimiter } from "./middleware/rateLimitMiddleware.js";
 import recommendationRoutes from "./routes/recommendationRoutes.js";
+import externalEventRoutes from "./routes/externalEventRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import { seedAdminUser } from "./utils/seedAdmin.js";
+
 
 dotenv.config();
 
@@ -28,9 +32,11 @@ app.use("/api/events", eventRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/recommendations", recommendationRoutes);
+app.use("/api/external-events", externalEventRoutes);
+app.use("/api/users", userRoutes);
 
 const PORT = process.env.PORT || 5001;
-
+await seedAdminUser();
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

@@ -1,6 +1,6 @@
 const API_BASE_URL = "http://localhost:5001/api/events";
 
-const getAdminHeaders = () => ({
+const getHeaders = () => ({
   "Content-Type": "application/json",
   Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
@@ -8,7 +8,7 @@ const getAdminHeaders = () => ({
 export const createEvent = async (eventData) => {
   const response = await fetch(API_BASE_URL, {
     method: "POST",
-    headers: getAdminHeaders(),
+    headers: getHeaders(),
     body: JSON.stringify(eventData),
   });
 
@@ -24,7 +24,7 @@ export const createEvent = async (eventData) => {
 export const updateEvent = async (id, eventData) => {
   const response = await fetch(`${API_BASE_URL}/${id}`, {
     method: "PUT",
-    headers: getAdminHeaders(),
+    headers: getHeaders(),
     body: JSON.stringify(eventData),
   });
 
@@ -55,16 +55,17 @@ export const deleteEvent = async (id) => {
 };
 
 
-
-
-
-
 // const API_BASE_URL = "http://localhost:5001/api/events";
+
+// const getAdminHeaders = () => ({
+//   "Content-Type": "application/json",
+//   Authorization: `Bearer ${localStorage.getItem("token")}`,
+// });
 
 // export const createEvent = async (eventData) => {
 //   const response = await fetch(API_BASE_URL, {
 //     method: "POST",
-//     headers: { "Content-Type": "application/json" },
+//     headers: getAdminHeaders(),
 //     body: JSON.stringify(eventData),
 //   });
 
@@ -80,7 +81,7 @@ export const deleteEvent = async (id) => {
 // export const updateEvent = async (id, eventData) => {
 //   const response = await fetch(`${API_BASE_URL}/${id}`, {
 //     method: "PUT",
-//     headers: { "Content-Type": "application/json" },
+//     headers: getAdminHeaders(),
 //     body: JSON.stringify(eventData),
 //   });
 
@@ -96,6 +97,9 @@ export const deleteEvent = async (id) => {
 // export const deleteEvent = async (id) => {
 //   const response = await fetch(`${API_BASE_URL}/${id}`, {
 //     method: "DELETE",
+//     headers: {
+//       Authorization: `Bearer ${localStorage.getItem("token")}`,
+//     },
 //   });
 
 //   const data = await response.json();
