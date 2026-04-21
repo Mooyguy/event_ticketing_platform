@@ -105,6 +105,41 @@ export const getAllBookings = async (req, res) => {
   }
 };
 
+export const deleteBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await pool.query(
+      "SELECT * FROM bookings WHERE id = ?",
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const booking = rows[0];
+
+    // restore seats to the event
+    await pool.query(
+      "UPDATE events SET seats_left = seats_left + ? WHERE id = ?",
+      [booking.quantity, booking.event_id]
+    );
+
+    await pool.query(
+      "DELETE FROM bookings WHERE id = ?",
+      [id]
+    );
+
+    res.json({ message: "Booking deleted successfully" });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to delete booking",
+      error: error.message,
+    });
+  }
+};
+
 export const getBookingsByUser = async (req, res) => {
   try {
     const { userId } = req.params;

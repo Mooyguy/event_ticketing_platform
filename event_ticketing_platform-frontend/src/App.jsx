@@ -17,6 +17,7 @@ import AdminCreateEventPage from "./pages/AdminCreateEventPage";
 import AdminEditEventPage from "./pages/AdminEditEventPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import PaymentPage from "./pages/PaymentPage";
+import AdminBookingsPage from "./pages/AdminBookingsPage";
 
 import AdminUsersPage from "./pages/AdminUsersPage";
 
@@ -60,7 +61,14 @@ export default function App() {
     </ProtectedRoute>
   }
 />
-
+<Route
+  path="/admin/bookings"
+  element={
+    <ProtectedRoute requireAdmin={true}>
+      <AdminBookingsPage />
+    </ProtectedRoute>
+  }
+/>
           <Route
             path="/admin/analytics"
             element={

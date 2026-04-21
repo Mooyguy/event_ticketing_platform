@@ -73,3 +73,26 @@ export const fetchBookingsByUser = async (userId) => {
 
   return data;
 };
+export const deleteBookingById = async (id) => {
+  const response = await fetch(`http://localhost:5001/api/bookings/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (response.status === 401) {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    return;
+  }
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to delete booking");
+  }
+
+  return data;
+};
