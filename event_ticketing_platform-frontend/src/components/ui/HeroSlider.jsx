@@ -44,7 +44,7 @@ export default function HeroSlider({ events = [] }) {
         <div className="absolute inset-0 flex items-end p-4 sm:p-6">
           <div className="max-w-xl text-white">
 
-            <span className="rounded-full bg-blue-600 px-3 py-1 text-[10px] font-semibold sm:text-xs">
+            <span className="rounded-full bg-green-600 px-3 py-1 text-[10px] font-semibold sm:text-xs">
               {currentEvent.category}
             </span>
 
@@ -61,7 +61,7 @@ export default function HeroSlider({ events = [] }) {
             {/* 👇 Smaller button */}
             <Link
               to={`/events/${currentEvent.id}`}
-              className="mt-3 inline-block rounded-full bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 sm:text-sm"
+              className="mt-3 inline-block rounded-full bg-yellow-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-yellow-700 sm:text-sm"
             >
               View Event
             </Link>
@@ -77,7 +77,7 @@ export default function HeroSlider({ events = [] }) {
             key={index}
             onClick={() => setCurrentIndex(index)}
             className={`h-2 w-2 rounded-full transition ${
-              index === currentIndex ? "bg-blue-600" : "bg-slate-300"
+              index === currentIndex ? "bg-red-600" : "bg-slate-300"
             }`}
           />
         ))}

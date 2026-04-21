@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Search, MapPin } from "lucide-react";
-import PageHero from "../components/ui/PageHero";
 import CategoryPills from "../components/ui/CategoryPills";
 import EventCard from "../components/ui/EventCard";
-import HeroSlider from "../components/ui/HeroSlider";
 import { fetchAllEvents } from "../services/eventService";
 import { searchExternalEvents } from "../services/externalEventService";
 
@@ -23,6 +21,13 @@ const categories = [
   "Other",
 ];
 
+const heroImages = [
+  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1600&q=80",
+  "https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2?auto=format&fit=crop&w=1600&q=80",
+  "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1600&q=80",
+  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80",
+];
+
 export default function BrowseEventsPage() {
   const [selectedCategory, setSelectedCategory] = useState("All Events");
   const [searchText, setSearchText] = useState("");
@@ -32,7 +37,18 @@ export default function BrowseEventsPage() {
   const [loading, setLoading] = useState(true);
   const [loadingExternal, setLoadingExternal] = useState(false);
   const [error, setError] = useState("");
+  const [currentImage, setCurrentImage] = useState(0);
   const resultsRef = useRef(null);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentImage((prev) =>
+        prev === heroImages.length - 1 ? 0 : prev + 1
+      );
+    }, 4000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -155,17 +171,34 @@ export default function BrowseEventsPage() {
 
   return (
     <>
-      <PageHero
-        title="Discover Amazing Events"
-        subtitle="Find and book tickets for concerts, sports, workshops, and more"
-      />
+      <section className="relative overflow-hidden px-4 pb-10 pt-12 sm:px-6 lg:px-10 lg:pb-14 lg:pt-16">
+        {heroImages.map((img, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+              index === currentImage ? "opacity-100" : "opacity-0"
+            }`}
 
-      <HeroSlider events={featuredEvents} />
+            style={{
+              backgroundImage: `url(${img}&auto=format&fit=crop&w=1600&q=80)`,
+            }}
+          />
+        ))}
 
-      <section className="bg-gradient-to-r from-blue-500 via-blue-500 to-blue-600 px-4 pb-8 pt-6 sm:px-6 lg:px-10">
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 rounded-3xl bg-white p-4 shadow-lg sm:p-5 lg:flex-row lg:items-center">
-            <div className="flex flex-1 items-center gap-2 rounded-full border border-slate-200 px-4 py-3">
+        <div className="absolute inset-0 bg-slate-900/65" />
+
+        <div className="relative mx-auto max-w-7xl">
+          <div className="text-center text-white">
+            <h1 className="text-4xl font-extrabold sm:text-5xl lg:text-6xl">
+              Discover Amazing Events
+            </h1>
+            <p className="mx-auto mt-3 max-w-3xl text-sm sm:text-base lg:text-2xl">
+              Find and book tickets for concerts, sports, workshops, and more
+            </p>
+          </div>
+
+          <div className="mx-auto mt-8 flex w-full max-w-4xl flex-col gap-3 rounded-3xl bg-white p-3 shadow-xl sm:p-4 lg:flex-row lg:items-center">
+            <div className="flex flex-1 items-center gap-2 rounded-full border border-slate-200 px-3 py-2.5">
               <Search className="h-4 w-4 text-slate-400" />
               <input
                 type="text"
@@ -176,7 +209,7 @@ export default function BrowseEventsPage() {
               />
             </div>
 
-            <div className="flex items-center gap-2 rounded-full border border-slate-200 px-4 py-3 lg:min-w-[220px]">
+            <div className="flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2.5 lg:min-w-[190px]">
               <MapPin className="h-4 w-4 text-slate-400" />
               <select
                 value={selectedCity}
@@ -192,11 +225,24 @@ export default function BrowseEventsPage() {
             </div>
           </div>
 
-          <CategoryPills
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelect={setSelectedCategory}
-          />
+          <div className="mt-5 flex justify-center gap-2">
+            {heroImages.map((_, index) => (
+              <span
+                key={index}
+                className={`h-2.5 w-2.5 rounded-full transition ${
+                  index === currentImage ? "bg-white" : "bg-white/40"
+                }`}
+              />
+            ))}
+          </div>
+
+             <div className="mt-6">
+              <CategoryPills
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelect={setSelectedCategory}
+              />
+            </div>
         </div>
       </section>
 
@@ -238,7 +284,7 @@ export default function BrowseEventsPage() {
                   </div>
                 ) : (
                   <div className="rounded-[24px] bg-white p-6 text-center shadow-lg">
-                    {/* No worldwide events found. */}
+                    No worldwide events found.
                   </div>
                 )}
               </section>
@@ -250,9 +296,6 @@ export default function BrowseEventsPage() {
                   <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
                     Local Matching Events
                   </h2>
-                  <p className="mt-2 text-slate-600">
-                    {/* Matching events based on your search and selected filters. */}
-                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -274,9 +317,6 @@ export default function BrowseEventsPage() {
                     <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
                       Browse Events
                     </h2>
-                    <p className="mt-2 text-slate-600">
-                      {/* Explore one highlighted event from each category. */}
-                    </p>
                   </div>
 
                   <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -291,9 +331,6 @@ export default function BrowseEventsPage() {
                     <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
                       Featured Events
                     </h2>
-                    <p className="mt-2 text-slate-600">
-                      {/* Handpicked events highlighted on the homepage. */}
-                    </p>
                   </div>
 
                   <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
