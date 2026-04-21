@@ -19,13 +19,18 @@ export const createBooking = async (req, res) => {
     }
 
     const [existingBookings] = await pool.query(
-      "SELECT id FROM bookings WHERE user_id = ? AND event_id = ?",
+      "SELECT * FROM bookings WHERE user_id = ? AND event_id = ?",
       [user_id, event_id]
     );
 
     if (existingBookings.length > 0) {
+      const existingBooking = existingBookings[0];
+
       return res.status(409).json({
-        message: "You have already booked this event",
+        message: "You already booked this event",
+        bookingExists: true,
+        existingBookingId: existingBooking.id,
+        existingQuantity: existingBooking.quantity,
       });
     }
 
@@ -40,7 +45,7 @@ export const createBooking = async (req, res) => {
 
     const event = eventRows[0];
 
-    if (event.seats_left < quantity) {
+    if (event.seats_left < Number(quantity)) {
       return res.status(400).json({
         message: "Not enough seats available",
       });
@@ -57,7 +62,7 @@ export const createBooking = async (req, res) => {
     );
 
     await pool.query(
-      `UPDATE events SET seats_left = seats_left - ? WHERE id = ?`,
+      "UPDATE events SET seats_left = seats_left - ? WHERE id = ?",
       [quantity, event_id]
     );
 
@@ -70,6 +75,73 @@ export const createBooking = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Booking failed",
+      error: error.message,
+    });
+  }
+};
+
+export const addTicketsToExistingBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { quantity } = req.body;
+
+    const [bookingRows] = await pool.query(
+      "SELECT * FROM bookings WHERE id = ?",
+      [id]
+    );
+
+    if (bookingRows.length === 0) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const booking = bookingRows[0];
+
+    if (Number(req.user.id) !== Number(booking.user_id) && req.user.role !== "admin") {
+      return res.status(403).json({
+        message: "You are not allowed to update this booking",
+      });
+    }
+
+    const [eventRows] = await pool.query(
+      "SELECT * FROM events WHERE id = ?",
+      [booking.event_id]
+    );
+
+    if (eventRows.length === 0) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    const event = eventRows[0];
+
+    if (event.seats_left < Number(quantity)) {
+      return res.status(400).json({
+        message: "Not enough seats available",
+      });
+    }
+
+    const newQuantity = Number(booking.quantity) + Number(quantity);
+
+    await pool.query(
+      "UPDATE bookings SET quantity = ? WHERE id = ?",
+      [newQuantity, id]
+    );
+
+    await pool.query(
+      "UPDATE events SET seats_left = seats_left - ? WHERE id = ?",
+      [quantity, booking.event_id]
+    );
+
+    res.status(200).json({
+      message: "Booking updated successfully",
+      merged: true,
+      bookingId: booking.id,
+      newQuantity,
+      ticketCode: booking.ticket_code,
+      qrCode: booking.qr_code,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update booking",
       error: error.message,
     });
   }
@@ -100,41 +172,6 @@ export const getAllBookings = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Failed to fetch bookings",
-      error: error.message,
-    });
-  }
-};
-
-export const deleteBooking = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const [rows] = await pool.query(
-      "SELECT * FROM bookings WHERE id = ?",
-      [id]
-    );
-
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "Booking not found" });
-    }
-
-    const booking = rows[0];
-
-    // restore seats to the event
-    await pool.query(
-      "UPDATE events SET seats_left = seats_left + ? WHERE id = ?",
-      [booking.quantity, booking.event_id]
-    );
-
-    await pool.query(
-      "DELETE FROM bookings WHERE id = ?",
-      [id]
-    );
-
-    res.json({ message: "Booking deleted successfully" });
-  } catch (error) {
-    res.status(500).json({
-      message: "Failed to delete booking",
       error: error.message,
     });
   }
@@ -177,6 +214,40 @@ export const getBookingsByUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Failed to fetch user bookings",
+      error: error.message,
+    });
+  }
+};
+
+export const deleteBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await pool.query(
+      "SELECT * FROM bookings WHERE id = ?",
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const booking = rows[0];
+
+    await pool.query(
+      "UPDATE events SET seats_left = seats_left + ? WHERE id = ?",
+      [booking.quantity, booking.event_id]
+    );
+
+    await pool.query(
+      "DELETE FROM bookings WHERE id = ?",
+      [id]
+    );
+
+    res.json({ message: "Booking deleted successfully" });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to delete booking",
       error: error.message,
     });
   }

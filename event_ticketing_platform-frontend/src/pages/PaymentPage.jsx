@@ -1,7 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import PageHero from "../components/ui/PageHero";
-import { createBooking } from "../services/bookingService";
+import {
+  createBooking,
+  addTicketsToBooking,
+} from "../services/bookingService";
 import { formatCurrency } from "../utils/formatCurrency";
 
 function maskCardNumber(value) {
@@ -24,15 +27,20 @@ export default function PaymentPage() {
 
   const bookingData = location.state;
 
-  const storedUser = localStorage.getItem("user");
   const loggedInUser = useMemo(() => {
+    const storedUser = localStorage.getItem("user");
+
     if (!storedUser) return null;
+
     try {
       return JSON.parse(storedUser);
-    } catch {
+    } catch (error) {
+      console.error("Invalid user data in localStorage:", error);
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
       return null;
     }
-  }, [storedUser]);
+  }, []);
 
   const [cardName, setCardName] = useState(loggedInUser?.name || "");
   const [cardNumber, setCardNumber] = useState("");
@@ -45,14 +53,15 @@ export default function PaymentPage() {
     return <Navigate to="/" replace />;
   }
 
-  const totalAmount = Number(bookingData.price) * Number(bookingData.quantity);
+  const totalAmount =
+    Number(bookingData.price || 0) * Number(bookingData.quantity || 0);
 
   const handlePayment = async (e) => {
     e.preventDefault();
     setError("");
 
     const cleanCardNumber = cardNumber.replace(/\s/g, "");
-    const cleanExpiry = expiry.replace(/\s/g, "");
+    const cleanExpiry = expiry.trim();
 
     if (!cardName.trim()) {
       setError("Please enter the cardholder name.");
@@ -64,7 +73,7 @@ export default function PaymentPage() {
       return;
     }
 
-    if (cleanExpiry.length !== 5 || !cleanExpiry.includes("/")) {
+    if (!/^\d{2}\/\d{2}$/.test(cleanExpiry)) {
       setError("Expiry date must be in MM/YY format.");
       return;
     }
@@ -77,7 +86,7 @@ export default function PaymentPage() {
     try {
       setProcessing(true);
 
-      // Simulated payment delay
+      // demo payment delay
       await new Promise((resolve) => setTimeout(resolve, 1200));
 
       const result = await createBooking({
@@ -85,34 +94,59 @@ export default function PaymentPage() {
         user_name: loggedInUser.name,
         user_email: loggedInUser.email,
         event_id: bookingData.event_id,
-        quantity: bookingData.quantity,
+        quantity: Number(bookingData.quantity),
       });
-
-      navigate("/booking-success", {
-  state: {
-    user_name: loggedInUser.name,
-    user_email: loggedInUser.email,
-    eventTitle: bookingData.eventTitle,
-    quantity: bookingData.quantity,
-    ticketCode: result.ticketCode || "",
-    qrCode: result.qrCode || "",
-    amount: totalAmount,
-    event_id: bookingData.event_id,
-  },
-});
 
       navigate("/booking-success", {
         state: {
           user_name: loggedInUser.name,
           user_email: loggedInUser.email,
           eventTitle: bookingData.eventTitle,
-          quantity: bookingData.quantity,
+          quantity: Number(bookingData.quantity),
           ticketCode: result.ticketCode || "",
           qrCode: result.qrCode || "",
           amount: totalAmount,
+          event_id: bookingData.event_id,
+          isUpdated: false,
         },
       });
     } catch (err) {
+      if (err.status === 409 && err.data?.bookingExists) {
+        const shouldMerge = window.confirm(
+          `You already booked this event with ${err.data.existingQuantity} ticket(s).\n\nDo you want to add ${bookingData.quantity} more ticket(s) to your existing booking?`
+        );
+
+        if (!shouldMerge) {
+          setError("Booking update cancelled.");
+          return;
+        }
+
+        try {
+          const updated = await addTicketsToBooking(
+            err.data.existingBookingId,
+            Number(bookingData.quantity)
+          );
+
+          navigate("/booking-success", {
+            state: {
+              user_name: loggedInUser.name,
+              user_email: loggedInUser.email,
+              eventTitle: bookingData.eventTitle,
+              quantity: updated.newQuantity,
+              ticketCode: updated.ticketCode || "",
+              qrCode: updated.qrCode || "",
+              amount: Number(bookingData.price) * Number(updated.newQuantity),
+              event_id: bookingData.event_id,
+              isUpdated: true,
+            },
+          });
+        } catch (mergeError) {
+          setError(mergeError.message || "Failed to update existing booking");
+        }
+
+        return;
+      }
+
       setError(err.message || "Payment failed");
     } finally {
       setProcessing(false);
@@ -129,7 +163,9 @@ export default function PaymentPage() {
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="rounded-[28px] bg-white p-5 shadow-lg sm:p-8">
-            <h2 className="text-2xl font-bold text-slate-900">Payment Details</h2>
+            <h2 className="text-2xl font-bold text-slate-900">
+              Payment Details
+            </h2>
             <p className="mt-2 text-sm text-slate-600 sm:text-base">
               Enter your card details to complete this payment.
             </p>
@@ -185,7 +221,9 @@ export default function PaymentPage() {
                   <input
                     type="password"
                     value={cvv}
-                    onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                    onChange={(e) =>
+                      setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))
+                    }
                     placeholder="123"
                     className="h-12 w-full rounded-xl border border-slate-300 px-4 outline-none focus:border-blue-500"
                     required
@@ -220,8 +258,8 @@ export default function PaymentPage() {
             </form>
 
             <p className="mt-4 text-xs text-slate-500">
-              Demo payment page for capstone project. Card details are validated in
-              the UI only and are not stored.
+              Demo payment page for capstone project. Card details are validated
+              in the UI only and are not stored.
             </p>
           </div>
 

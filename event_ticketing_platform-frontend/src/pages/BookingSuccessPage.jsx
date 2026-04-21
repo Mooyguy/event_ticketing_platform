@@ -8,6 +8,7 @@ import { fetchRecommendedEvents } from "../services/recommendationService";
 export default function BookingSuccessPage() {
   const location = useLocation();
   const booking = location.state;
+  const isUpdated = location.state?.isUpdated;
 
   const [recommendedEvents, setRecommendedEvents] = useState([]);
   const [loadingRecommendations, setLoadingRecommendations] = useState(true);
@@ -42,6 +43,23 @@ export default function BookingSuccessPage() {
         title="Booking Successful"
         subtitle="Your ticket has been confirmed successfully"
       />
+      <h2 className="text-2xl font-bold text-green-600">
+  {isUpdated
+    ? "Booking Updated Successfully!"
+    : "Booking Confirmed!"}
+</h2>
+
+<p className="mt-2 text-slate-600">
+  {isUpdated
+    ? "Your existing booking has been updated with additional tickets."
+    : "Your ticket has been successfully booked."}
+</p>
+
+{isUpdated && (
+  <span className="inline-block mt-3 rounded-full bg-blue-100 px-4 py-1 text-sm font-semibold text-blue-700">
+    Updated Booking
+  </span>
+)}
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
         <div className="rounded-[28px] bg-white p-5 shadow-lg sm:p-8">
