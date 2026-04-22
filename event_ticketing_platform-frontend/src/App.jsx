@@ -22,6 +22,7 @@ import CartPage from "./pages/CartPage";
 import AdminMerchandisePage from "./pages/AdminMerchandisePage";
 import AdminCreateMerchandisePage from "./pages/AdminCreateMerchandisePage";
 import AdminEditMerchandisePage from "./pages/AdminEditMerchandisePage";
+import MerchandiseDetailsPage from "./pages/MerchandiseDetailsPage";
 
 
 
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="/search-booking" element={<SearchBookingPage />} />
           <Route path="/booking-success" element={<BookingSuccessPage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/merchandise/:id" element={<MerchandiseDetailsPage />} />
 
           <Route
             path="/my-bookings"

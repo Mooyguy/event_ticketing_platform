@@ -43,7 +43,6 @@ export default function EventDetailsPage() {
       try {
         setLoading(true);
         setError("");
-
         const data = await fetchEventById(id);
         setEvent(data);
       } catch (err) {
@@ -374,13 +373,22 @@ export default function EventDetailsPage() {
                     </span>
                   </div>
 
-                  <button
-                    onClick={() => handleAddMerchToCart(item)}
-                    disabled={Number(item.stock) <= 0}
-                    className="mt-4 w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-                  >
-                    {Number(item.stock) > 0 ? "Add to Cart" : "Out of Stock"}
-                  </button>
+                  <div className="mt-4 flex flex-col gap-2">
+                    <button
+                      onClick={() => handleAddMerchToCart(item)}
+                      disabled={Number(item.stock) <= 0}
+                      className="w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                    >
+                      {Number(item.stock) > 0 ? "Add to Cart" : "Out of Stock"}
+                    </button>
+
+                    <Link
+                      to={`/merchandise/${item.id}`}
+                      className="w-full rounded-xl border border-slate-300 bg-white px-5 py-3 text-center font-semibold text-slate-800 hover:bg-slate-50"
+                    >
+                      View Details
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>
@@ -436,13 +444,22 @@ export default function EventDetailsPage() {
                     </span>
                   </div>
 
-                  <button
-                    onClick={() => handleAddMerchToCart(item)}
-                    disabled={Number(item.stock) <= 0}
-                    className="mt-4 w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-                  >
-                    {Number(item.stock) > 0 ? "Add to Cart" : "Out of Stock"}
-                  </button>
+                  <div className="mt-4 flex flex-col gap-2">
+                    <button
+                      onClick={() => handleAddMerchToCart(item)}
+                      disabled={Number(item.stock) <= 0}
+                      className="w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                    >
+                      {Number(item.stock) > 0 ? "Add to Cart" : "Out of Stock"}
+                    </button>
+
+                    <Link
+                      to={`/merchandise/${item.id}`}
+                      className="w-full rounded-xl border border-slate-300 bg-white px-5 py-3 text-center font-semibold text-slate-800 hover:bg-slate-50"
+                    >
+                      View Details
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>

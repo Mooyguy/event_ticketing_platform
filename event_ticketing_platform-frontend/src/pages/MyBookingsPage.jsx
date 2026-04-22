@@ -1,79 +1,98 @@
 import React, { useEffect, useState } from "react";
 import PageHero from "../components/ui/PageHero";
-import SectionTitle from "../components/ui/SectionTitle";
-import BookingCard from "../components/booking/BookingCard";
-import { fetchBookingsByUser } from "../services/bookingService";
+import { fetchOrdersByUser } from "../services/orderService";
 
 export default function MyBookingsPage() {
-  const [bookings, setBookings] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    const loadBookings = async () => {
+    const load = async () => {
       try {
-        setLoading(true);
-        setError("");
-
-        const storedUser = localStorage.getItem("user");
-        if (!storedUser) {
-          throw new Error("Please login to view your bookings");
-        }
-
-        const user = JSON.parse(storedUser);
-
-        const data = await fetchBookingsByUser(user.id);
-        setBookings(data);
+        const data = await fetchOrdersByUser(user.id);
+        setOrders(data);
       } catch (err) {
-        setError(err.message || "Failed to load bookings");
+        alert(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    loadBookings();
+    load();
   }, []);
 
   return (
     <>
       <PageHero
-        title="My Bookings"
-        subtitle="Review your confirmed and recent event bookings"
+        title="My Orders"
+        subtitle="View your tickets and merchandise purchases"
       />
 
-      <main className="mx-auto max-w-7xl px-6 py-12 lg:px-10">
-        <SectionTitle
-          title="Your Booking History"
-          subtitle=""
-        />
+      <main className="mx-auto max-w-5xl px-4 py-10">
 
-        {loading && (
-          <div className="rounded-[24px] bg-white p-8 text-center text-lg shadow-lg">
-            Loading bookings...
+        {loading ? (
+          <div className="text-center">Loading...</div>
+        ) : orders.length === 0 ? (
+          <div className="text-center">No orders found.</div>
+        ) : (
+          <div className="space-y-6">
+            {orders.map((order) => (
+              <div key={order.id} className="bg-white p-6 rounded-xl shadow-lg">
+
+                <h3 className="text-xl font-bold">
+                  Order #{order.id}
+                </h3>
+
+                <p className="text-sm text-gray-500">
+                  {new Date(order.created_at).toLocaleDateString()}
+                </p>
+
+                <p className="font-semibold mt-1">
+                  Status: {order.payment_status}
+                </p>
+
+                {/* TICKETS */}
+                <div className="mt-4">
+                  <h4 className="font-bold">Tickets</h4>
+
+                  {order.tickets.length > 0 ? (
+                    order.tickets.map((t) => (
+                      <p key={t.id}>
+                        - {t.event_title} × {t.quantity}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No tickets</p>
+                  )}
+                </div>
+
+                {/* MERCH */}
+                <div className="mt-4">
+                  <h4 className="font-bold">Merchandise</h4>
+
+                  {order.merchandise.length > 0 ? (
+                    order.merchandise.map((m) => (
+                      <p key={m.id}>
+                        - {m.name} × {m.quantity}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No merchandise</p>
+                  )}
+                </div>
+
+                {/* TOTAL */}
+                <div className="mt-4 font-bold text-lg">
+                  Total: ${Number(order.total_amount).toFixed(2)}
+                </div>
+
+              </div>
+            ))}
           </div>
         )}
 
-        {error && (
-          <div className="rounded-[24px] bg-red-100 p-8 text-center text-lg text-red-700 shadow-lg">
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && (
-          <>
-            {bookings.length === 0 ? (
-              <div className="rounded-[24px] bg-white p-8 text-center text-lg shadow-lg">
-                No bookings found.
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {bookings.map((booking) => (
-                  <BookingCard key={booking.id} booking={booking} />
-                ))}
-              </div>
-            )}
-          </>
-        )}
       </main>
     </>
   );
