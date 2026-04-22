@@ -7,8 +7,6 @@ import {
   getCart,
   updateCartItemQuantity,
   removeFromCart,
-  getCartTotal,
-  getCartCount,
 } from "../services/cartService";
 import getCategoryImage from "../utils/getCategoryImage";
 
@@ -27,8 +25,20 @@ export default function CartPage() {
     setCart(updated);
   };
 
-  const total = useMemo(() => getCartTotal(), [cart]);
-  const totalTickets = useMemo(() => getCartCount(), [cart]);
+ const total = useMemo(() => {
+  return cart.reduce(
+    (sum, item) =>
+      sum + Number(item.price || 0) * Number(item.quantity || 0),
+    0
+  );
+}, [cart]);
+
+const totalTickets = useMemo(() => {
+  return cart.reduce(
+    (sum, item) => sum + Number(item.quantity || 0),
+    0
+  );
+}, [cart]);
 
   return (
     <>
