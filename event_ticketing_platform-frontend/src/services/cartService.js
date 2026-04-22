@@ -1,4 +1,9 @@
 const CART_KEY = "event_cart";
+const CART_UPDATED_EVENT = "cart-updated";
+
+const notifyCartUpdated = () => {
+  window.dispatchEvent(new Event(CART_UPDATED_EVENT));
+};
 
 export const getCart = () => {
   try {
@@ -11,6 +16,7 @@ export const getCart = () => {
 
 export const saveCart = (cart) => {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  notifyCartUpdated();
 };
 
 export const addToCart = (event, quantity = 1) => {
@@ -21,7 +27,7 @@ export const addToCart = (event, quantity = 1) => {
   );
 
   if (existingIndex !== -1) {
-    cart[existingIndex].quantity += quantity;
+    cart[existingIndex].quantity += Number(quantity);
   } else {
     cart.push({
       event_id: event.id,
@@ -31,7 +37,7 @@ export const addToCart = (event, quantity = 1) => {
       location: event.location,
       price: Number(event.price || 0),
       image: event.image || "",
-      quantity,
+      quantity: Number(quantity),
     });
   }
 
@@ -54,16 +60,21 @@ export const removeFromCart = (eventId) => {
   const cart = getCart().filter(
     (item) => String(item.event_id) !== String(eventId)
   );
+
   saveCart(cart);
   return cart;
 };
 
 export const clearCart = () => {
   localStorage.removeItem(CART_KEY);
+  notifyCartUpdated();
 };
 
 export const getCartCount = () => {
-  return getCart().reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  return getCart().reduce(
+    (sum, item) => sum + Number(item.quantity || 0),
+    0
+  );
 };
 
 export const getCartTotal = () => {
@@ -72,3 +83,5 @@ export const getCartTotal = () => {
     0
   );
 };
+
+export const CART_EVENT_NAME = CART_UPDATED_EVENT;

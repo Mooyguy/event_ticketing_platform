@@ -15,7 +15,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import logo from "../../assets/logo.png";
-import { getCartCount } from "../../services/cartService";
+import { getCartCount, CART_EVENT_NAME } from "../../services/cartService";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -48,6 +48,12 @@ export default function Navbar() {
 
   useEffect(() => {
     const updateCartCount = () => {
+      const storedUser = localStorage.getItem("user");
+      if (!storedUser) {
+        setCartCount(0);
+        return;
+      }
+
       setCartCount(getCartCount());
     };
 
@@ -55,24 +61,26 @@ export default function Navbar() {
 
     window.addEventListener("storage", updateCartCount);
     window.addEventListener("focus", updateCartCount);
+    window.addEventListener(CART_EVENT_NAME, updateCartCount);
 
     return () => {
       window.removeEventListener("storage", updateCartCount);
       window.removeEventListener("focus", updateCartCount);
+      window.removeEventListener(CART_EVENT_NAME, updateCartCount);
     };
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    setCartCount(0);
     window.location.href = "/";
   };
 
   const closeMenu = () => setMenuOpen(false);
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-2 font-semibold whitespace-nowrap transition ${
-      isActive ? "text-blue-600" : "text-slate-800 hover:text-blue-600"
+    `flex items-center gap-2 font-semibold whitespace-nowrap transition ${isActive ? "text-blue-600" : "text-slate-800 hover:text-blue-600"
     }`;
 
   const simpleLinkClass =
@@ -80,14 +88,12 @@ export default function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 border-b bg-white/95 backdrop-blur transition ${
-        scrolled ? "shadow-md" : "shadow-sm"
-      }`}
+      className={`sticky top-0 z-50 border-b bg-white/95 backdrop-blur transition ${scrolled ? "shadow-md" : "shadow-sm"
+        }`}
     >
       <div
-        className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${
-          scrolled ? "py-2" : "py-3"
-        }`}
+        className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${scrolled ? "py-2" : "py-3"
+          }`}
       >
         <div className="flex items-center justify-between gap-4">
           <NavLink
@@ -114,55 +120,67 @@ export default function Navbar() {
           </button>
 
           <nav className="hidden items-center gap-4 lg:flex">
-            <NavLink to="/" className={linkClass}>
-              <Home className="h-4 w-4" /> Home
-            </NavLink>
-
-            <NavLink to="/cart" className={linkClass}>
-              <ShoppingCart className="h-4 w-4" />
-              Cart ({cartCount})
-            </NavLink>
-
             {user ? (
-              <>
-                <span className="rounded-full bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700">
-                  Welcome, {user.role === "admin" ? "Admin" : user.name}
-                </span>
+              user.role === "admin" ? (
+                <>
+                  <span className="rounded-full bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700">
+                    Welcome, Admin
+                  </span>
 
-                {user.role === "admin" ? (
-                  <>
-                    <NavLink to="/admin" className={linkClass}>
-                      <LayoutDashboard className="h-4 w-4" /> Dashboard
-                    </NavLink>
+                  <NavLink to="/admin" className={linkClass}>
+                    <LayoutDashboard className="h-4 w-4" /> Dashboard
+                  </NavLink>
 
-                    <NavLink to="/admin/events" className={linkClass}>
-                      <CalendarDays className="h-4 w-4" /> Events
-                    </NavLink>
+                  <NavLink to="/admin/events" className={linkClass}>
+                    <CalendarDays className="h-4 w-4" /> Events
+                  </NavLink>
 
-                    <NavLink to="/admin/users" className={linkClass}>
-                      <Users className="h-4 w-4" /> Users
-                    </NavLink>
+                  <NavLink to="/admin/users" className={linkClass}>
+                    <Users className="h-4 w-4" /> Users
+                  </NavLink>
 
-                    <NavLink to="/admin/bookings" className={linkClass}>
-                      <Ticket className="h-4 w-4" /> Bookings
-                    </NavLink>
+                  <NavLink to="/admin/bookings" className={linkClass}>
+                    <Ticket className="h-4 w-4" /> Bookings
+                  </NavLink>
 
-                    <NavLink to="/admin/analytics" className={linkClass}>
-                      <BarChart3 className="h-4 w-4" /> Analytics
-                    </NavLink>
-                  </>
-                ) : (
+                  <NavLink to="/admin/analytics" className={linkClass}>
+                    <BarChart3 className="h-4 w-4" /> Analytics
+                  </NavLink>
+
+                  <button onClick={handleLogout} className={simpleLinkClass}>
+                    <LogOut className="h-4 w-4" /> Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <NavLink to="/" className={linkClass}>
+                    <Home className="h-4 w-4" /> Home
+                  </NavLink>
+
+                  <NavLink to="/cart" className={linkClass}>
+                    <ShoppingCart className="h-4 w-4" />
+                    Cart ({cartCount})
+                  </NavLink>
+
+                  <span className="rounded-full bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700">
+                    Welcome, {user.name}
+                  </span>
+
                   <NavLink to="/my-bookings" className={linkClass}>
                     <Ticket className="h-4 w-4" /> My Bookings
                   </NavLink>
-                )}
 
-                <button onClick={handleLogout} className={simpleLinkClass}>
-                  <LogOut className="h-4 w-4" /> Logout
-                </button>
-              </>
+                  <button onClick={handleLogout} className={simpleLinkClass}>
+                    <LogOut className="h-4 w-4" /> Logout
+                  </button>
+                </>
+              )
             ) : (
               <>
+                <NavLink to="/" className={linkClass}>
+                  <Home className="h-4 w-4" /> Home
+                </NavLink>
+
                 <NavLink to="/login" className={linkClass}>
                   <LogIn className="h-4 w-4" /> Login
                 </NavLink>
@@ -177,91 +195,89 @@ export default function Navbar() {
 
         {menuOpen && (
           <nav className="mt-4 flex flex-col gap-3 rounded border p-4 shadow lg:hidden">
-            <NavLink to="/" className={linkClass} onClick={closeMenu}>
-              <Home className="h-5 w-5" />
-              Browse Events
-            </NavLink>
-
-            <NavLink to="/cart" className={linkClass} onClick={closeMenu}>
-              <ShoppingCart className="h-5 w-5" />
-              Cart ({cartCount})
-            </NavLink>
-
             {user ? (
-              <>
-                <div className="rounded bg-blue-50 px-4 py-2 font-semibold text-blue-700">
-                  Welcome, {user.role === "admin" ? "Admin" : user.name}
-                </div>
+              user.role === "admin" ? (
+                <>
+                  <div className="rounded bg-blue-50 px-4 py-2 font-semibold text-blue-700">
+                    Welcome, Admin
+                  </div>
 
-                {user.role === "admin" ? (
-                  <>
-                    <NavLink to="/admin" className={linkClass} onClick={closeMenu}>
-                      <LayoutDashboard className="h-5 w-5" />
-                      Dashboard
-                    </NavLink>
+                  <NavLink to="/admin" className={linkClass} onClick={closeMenu}>
+                    <LayoutDashboard className="h-5 w-5" /> Dashboard
+                  </NavLink>
 
-                    <NavLink
-                      to="/admin/events"
-                      className={linkClass}
-                      onClick={closeMenu}
-                    >
-                      <CalendarDays className="h-5 w-5" />
-                      Events
-                    </NavLink>
+                  <NavLink
+                    to="/admin/events"
+                    className={linkClass}
+                    onClick={closeMenu}
+                  >
+                    <CalendarDays className="h-5 w-5" /> Events
+                  </NavLink>
 
-                    <NavLink
-                      to="/admin/users"
-                      className={linkClass}
-                      onClick={closeMenu}
-                    >
-                      <Users className="h-5 w-5" />
-                      Users
-                    </NavLink>
+                  <NavLink
+                    to="/admin/users"
+                    className={linkClass}
+                    onClick={closeMenu}
+                  >
+                    <Users className="h-5 w-5" /> Users
+                  </NavLink>
 
-                    <NavLink
-                      to="/admin/bookings"
-                      className={linkClass}
-                      onClick={closeMenu}
-                    >
-                      <Ticket className="h-5 w-5" />
-                      Bookings
-                    </NavLink>
+                  <NavLink
+                    to="/admin/bookings"
+                    className={linkClass}
+                    onClick={closeMenu}
+                  >
+                    <Ticket className="h-5 w-5" /> Bookings
+                  </NavLink>
 
-                    <NavLink
-                      to="/admin/analytics"
-                      className={linkClass}
-                      onClick={closeMenu}
-                    >
-                      <BarChart3 className="h-5 w-5" />
-                      Analytics
-                    </NavLink>
-                  </>
-                ) : (
+                  <NavLink
+                    to="/admin/analytics"
+                    className={linkClass}
+                    onClick={closeMenu}
+                  >
+                    <BarChart3 className="h-5 w-5" /> Analytics
+                  </NavLink>
+
+                  <button onClick={handleLogout} className={simpleLinkClass}>
+                    <LogOut className="h-5 w-5" /> Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <NavLink to="/" className={linkClass} onClick={closeMenu}>
+                    <Home className="h-5 w-5" /> Home
+                  </NavLink>
+
+                  <NavLink to="/cart" className={linkClass} onClick={closeMenu}>
+                    <ShoppingCart className="h-5 w-5" />
+                    Cart ({cartCount})
+                  </NavLink>
+
                   <NavLink
                     to="/my-bookings"
                     className={linkClass}
                     onClick={closeMenu}
                   >
-                    <Ticket className="h-5 w-5" />
-                    My Bookings
+                    <Ticket className="h-5 w-5" /> My Bookings
                   </NavLink>
-                )}
 
-                <button onClick={handleLogout} className={simpleLinkClass}>
-                  <LogOut className="h-5 w-5" />
-                  Logout
-                </button>
-              </>
+                  <button onClick={handleLogout} className={simpleLinkClass}>
+                    <LogOut className="h-5 w-5" /> Logout
+                  </button>
+                </>
+              )
             ) : (
               <>
+                <NavLink to="/" className={linkClass} onClick={closeMenu}>
+                  <Home className="h-5 w-5" /> Browse Events
+                </NavLink>
+
                 <NavLink to="/login" className={linkClass} onClick={closeMenu}>
-                  <LogIn className="h-5 w-5" />
-                  Login
+                  <LogIn className="h-5 w-5" /> Login
                 </NavLink>
 
                 <NavLink to="/register" className={linkClass} onClick={closeMenu}>
-                  <UserPlus className="h-5 w-5" />
-                  Register
+                  <UserPlus className="h-5 w-5" /> Register
                 </NavLink>
               </>
             )}
