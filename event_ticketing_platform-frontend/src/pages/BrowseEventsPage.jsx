@@ -173,17 +173,16 @@ export default function BrowseEventsPage() {
     <>
       <section className="relative overflow-hidden px-4 pb-10 pt-12 sm:px-6 lg:px-10 lg:pb-14 lg:pt-16">
         {heroImages.map((img, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
-              index === currentImage ? "opacity-100" : "opacity-0"
-            }`}
-
-            style={{
-              backgroundImage: `url(${img}&auto=format&fit=crop&w=1600&q=80)`,
-            }}
-          />
-        ))}
+  <div
+    key={index}
+    className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+      index === currentImage ? "opacity-100" : "opacity-0"
+    }`}
+    style={{
+      backgroundImage: `url(${img})`,
+    }}
+  />
+))}
 
         <div className="absolute inset-0 bg-slate-900/65" />
 

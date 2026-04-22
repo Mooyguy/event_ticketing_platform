@@ -12,7 +12,7 @@ export const fetchAllEvents = async () => {
 };
 
 export const fetchEventById = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/${id}`);
+  const response = await fetch(`http://localhost:5001/api/events/${id}`);
   const data = await response.json();
 
   if (!response.ok) {

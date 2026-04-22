@@ -18,6 +18,9 @@ import AdminEditEventPage from "./pages/AdminEditEventPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import PaymentPage from "./pages/PaymentPage";
 import AdminBookingsPage from "./pages/AdminBookingsPage";
+import CartPage from "./pages/CartPage";
+
+
 
 import AdminUsersPage from "./pages/AdminUsersPage";
 
@@ -34,6 +37,7 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/search-booking" element={<SearchBookingPage />} />
           <Route path="/booking-success" element={<BookingSuccessPage />} />
+          <Route path="/cart" element={<CartPage />} />
 
           <Route
             path="/my-bookings"
@@ -77,6 +81,15 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+  path="/payment"
+  element={
+    <ProtectedRoute>
+      <PaymentPage />
+    </ProtectedRoute>
+  }
+/>
 
           <Route
             path="/admin/events"
