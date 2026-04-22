@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search, MapPin } from "lucide-react";
 import CategoryPills from "../components/ui/CategoryPills";
 import EventCard from "../components/ui/EventCard";
 import { fetchAllEvents } from "../services/eventService";
 import { searchExternalEvents } from "../services/externalEventService";
+
+
 
 const categories = [
   "All Events",
@@ -20,7 +23,6 @@ const categories = [
   "Community",
   "Other",
 ];
-
 const heroImages = [
   "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1600&q=80",
   "https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2?auto=format&fit=crop&w=1600&q=80",
@@ -39,6 +41,15 @@ export default function BrowseEventsPage() {
   const [error, setError] = useState("");
   const [currentImage, setCurrentImage] = useState(0);
   const resultsRef = useRef(null);
+  const [searchParams] = useSearchParams();
+
+useEffect(() => {
+  const urlQuery = searchParams.get("q") || "";
+  const urlCity = searchParams.get("city") || "All Cities";
+
+  setSearchText(urlQuery);
+  setSelectedCity(urlCity);
+}, [searchParams]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {

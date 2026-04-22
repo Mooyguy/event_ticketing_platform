@@ -44,7 +44,7 @@ export default function MyBookingsPage() {
       <main className="mx-auto max-w-7xl px-6 py-12 lg:px-10">
         <SectionTitle
           title="Your Booking History"
-          subtitle="This page loads bookings for the currently logged-in user."
+          subtitle=""
         />
 
         {loading && (

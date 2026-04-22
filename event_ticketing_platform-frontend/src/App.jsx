@@ -19,6 +19,9 @@ import NotFoundPage from "./pages/NotFoundPage";
 import PaymentPage from "./pages/PaymentPage";
 import AdminBookingsPage from "./pages/AdminBookingsPage";
 import CartPage from "./pages/CartPage";
+import AdminMerchandisePage from "./pages/AdminMerchandisePage";
+import AdminCreateMerchandisePage from "./pages/AdminCreateMerchandisePage";
+import AdminEditMerchandisePage from "./pages/AdminEditMerchandisePage";
 
 
 
@@ -58,21 +61,21 @@ export default function App() {
           />
 
           <Route
-  path="/admin/events"
-  element={
-    <ProtectedRoute requireAdmin={true}>
-      <AdminEventsPage />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/admin/bookings"
-  element={
-    <ProtectedRoute requireAdmin={true}>
-      <AdminBookingsPage />
-    </ProtectedRoute>
-  }
-/>
+            path="/admin/events"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminEventsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/bookings"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminBookingsPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/admin/analytics"
             element={
@@ -81,15 +84,32 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/admin/merchandise/create"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminCreateMerchandisePage />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
-  path="/payment"
-  element={
-    <ProtectedRoute>
-      <PaymentPage />
-    </ProtectedRoute>
-  }
-/>
+            path="/admin/merchandise/edit/:id"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminEditMerchandisePage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/payment"
+            element={
+              <ProtectedRoute>
+                <PaymentPage />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/admin/events"
@@ -110,23 +130,30 @@ export default function App() {
           />
 
           <Route
-  path="/admin/users"
-  element={
-    <ProtectedRoute requireAdmin={true}>
-      <AdminUsersPage />
-    </ProtectedRoute>
-  }
-/>
+            path="/admin/users"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminUsersPage />
+              </ProtectedRoute>
+            }
+          />
 
-<Route
-  path="/payment"
-  element={
-    <ProtectedRoute>
-      <PaymentPage />
-    </ProtectedRoute>
-  }
-/>
-
+          <Route
+            path="/payment"
+            element={
+              <ProtectedRoute>
+                <PaymentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/merchandise"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminMerchandisePage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/admin/events/edit/:id"
             element={

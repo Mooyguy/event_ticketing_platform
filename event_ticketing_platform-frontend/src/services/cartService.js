@@ -23,13 +23,16 @@ export const addToCart = (event, quantity = 1) => {
   const cart = getCart();
 
   const existingIndex = cart.findIndex(
-    (item) => String(item.event_id) === String(event.id)
+    (item) =>
+      item.type === "ticket" &&
+      String(item.event_id) === String(event.id)
   );
 
   if (existingIndex !== -1) {
     cart[existingIndex].quantity += Number(quantity);
   } else {
     cart.push({
+      type: "ticket",
       event_id: event.id,
       eventTitle: event.title,
       category: event.category,
@@ -45,21 +48,27 @@ export const addToCart = (event, quantity = 1) => {
   return cart;
 };
 
-export const updateCartItemQuantity = (eventId, quantity) => {
-  const cart = getCart().map((item) =>
-    String(item.event_id) === String(eventId)
+export const updateCartItemQuantity = (id, quantity, type = "ticket") => {
+  const cart = getCart().map((item) => {
+    const itemId =
+      type === "ticket" ? item.event_id : item.merchandise_id;
+
+    return item.type === type && String(itemId) === String(id)
       ? { ...item, quantity: Math.max(1, Number(quantity)) }
-      : item
-  );
+      : item;
+  });
 
   saveCart(cart);
   return cart;
 };
 
-export const removeFromCart = (eventId) => {
-  const cart = getCart().filter(
-    (item) => String(item.event_id) !== String(eventId)
-  );
+export const removeFromCart = (id, type = "ticket") => {
+  const cart = getCart().filter((item) => {
+    const itemId =
+      type === "ticket" ? item.event_id : item.merchandise_id;
+
+    return !(item.type === type && String(itemId) === String(id));
+  });
 
   saveCart(cart);
   return cart;
@@ -82,6 +91,34 @@ export const getCartTotal = () => {
     (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0),
     0
   );
+};
+export const addMerchToCart = (merch, quantity = 1) => {
+  const cart = getCart();
+
+  const existingIndex = cart.findIndex(
+    (item) =>
+      item.type === "merch" &&
+      String(item.merchandise_id) === String(merch.id)
+  );
+
+  if (existingIndex !== -1) {
+    cart[existingIndex].quantity += Number(quantity);
+  } else {
+    cart.push({
+      type: "merch",
+      merchandise_id: merch.id,
+      name: merch.name,
+      category: merch.category,
+      price: Number(merch.price || 0),
+      image: merch.image || "",
+      stock: Number(merch.stock || 0),
+      event_id: merch.event_id || null,
+      quantity: Number(quantity),
+    });
+  }
+
+  saveCart(cart);
+  return cart;
 };
 
 export const CART_EVENT_NAME = CART_UPDATED_EVENT;

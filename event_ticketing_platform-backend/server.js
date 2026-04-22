@@ -12,6 +12,8 @@ import recommendationRoutes from "./routes/recommendationRoutes.js";
 import externalEventRoutes from "./routes/externalEventRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import { seedAdminUser } from "./utils/seedAdmin.js";
+import merchOrderRoutes from "./routes/merchOrderRoutes.js";
+import merchandiseRoutes from "./routes/merchandiseRoutes.js";
 
 
 dotenv.config();
@@ -34,6 +36,8 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/external-events", externalEventRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/merch-orders", merchOrderRoutes);
+app.use("/api/merchandise", merchandiseRoutes);
 
 const PORT = process.env.PORT || 5001;
 await seedAdminUser();

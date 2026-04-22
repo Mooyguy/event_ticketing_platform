@@ -12,9 +12,13 @@ import PageHero from "../components/ui/PageHero";
 import EventCard from "../components/ui/EventCard";
 import { fetchEventById } from "../services/eventService";
 import { fetchRecommendedEvents } from "../services/recommendationService";
-import { addToCart } from "../services/cartService";
+import { addToCart, addMerchToCart } from "../services/cartService";
 import { formatCurrency } from "../utils/formatCurrency";
 import getCategoryImage from "../utils/getCategoryImage";
+import {
+  fetchMerchandiseByEvent,
+  fetchRecommendedMerchandise,
+} from "../services/merchandiseService";
 
 export default function EventDetailsPage() {
   const { id } = useParams();
@@ -22,10 +26,17 @@ export default function EventDetailsPage() {
   const [event, setEvent] = useState(null);
   const [recommendedEvents, setRecommendedEvents] = useState([]);
   const [quantity, setQuantity] = useState(1);
+
   const [loading, setLoading] = useState(true);
   const [loadingRecommendations, setLoadingRecommendations] = useState(true);
+  const [loadingMerch, setLoadingMerch] = useState(true);
+  const [loadingRecommendedMerch, setLoadingRecommendedMerch] = useState(true);
+
   const [error, setError] = useState("");
   const [cartMessage, setCartMessage] = useState("");
+
+  const [merchandise, setMerchandise] = useState([]);
+  const [recommendedMerch, setRecommendedMerch] = useState([]);
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -64,17 +75,74 @@ export default function EventDetailsPage() {
     }
   }, [id]);
 
+  useEffect(() => {
+    const loadMerchandise = async () => {
+      try {
+        setLoadingMerch(true);
+        const data = await fetchMerchandiseByEvent(id);
+        setMerchandise(data || []);
+      } catch (err) {
+        console.error("Failed to load merchandise:", err);
+        setMerchandise([]);
+      } finally {
+        setLoadingMerch(false);
+      }
+    };
+
+    if (id) {
+      loadMerchandise();
+    }
+  }, [id]);
+
+  useEffect(() => {
+    const loadRecommendedMerch = async () => {
+      try {
+        if (!event?.category) {
+          setRecommendedMerch([]);
+          return;
+        }
+
+        setLoadingRecommendedMerch(true);
+        const data = await fetchRecommendedMerchandise(event.category);
+        setRecommendedMerch(data || []);
+      } catch (err) {
+        console.error("Failed to load recommended merchandise:", err);
+        setRecommendedMerch([]);
+      } finally {
+        setLoadingRecommendedMerch(false);
+      }
+    };
+
+    if (event?.category) {
+      loadRecommendedMerch();
+    }
+  }, [event]);
+
+  const showTemporaryMessage = (message) => {
+    setCartMessage(message);
+    setTimeout(() => setCartMessage(""), 2500);
+  };
+
   const handleAddToCart = () => {
     if (!event) return;
 
     if (Number(event.seatsLeft) <= 0) {
-      setCartMessage("This event is sold out.");
+      showTemporaryMessage("This event is sold out.");
       return;
     }
 
     addToCart(event, Number(quantity));
-    setCartMessage(`${quantity} ticket(s) added to cart.`);
-    setTimeout(() => setCartMessage(""), 2500);
+    showTemporaryMessage(`${quantity} ticket(s) added to cart.`);
+  };
+
+  const handleAddMerchToCart = (item) => {
+    if (Number(item.stock) <= 0) {
+      showTemporaryMessage("This merchandise item is out of stock.");
+      return;
+    }
+
+    addMerchToCart(item, 1);
+    showTemporaryMessage(`${item.name} added to cart.`);
   };
 
   if (loading) {
@@ -210,7 +278,9 @@ export default function EventDetailsPage() {
                   min="1"
                   max={Math.max(1, Number(event.seatsLeft))}
                   value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
+                  onChange={(e) =>
+                    setQuantity(Math.max(1, Number(e.target.value) || 1))
+                  }
                   disabled={isSoldOut}
                   className="h-12 w-full rounded-xl border border-slate-300 px-4 outline-none focus:border-blue-500 disabled:bg-slate-100"
                 />
@@ -258,6 +328,130 @@ export default function EventDetailsPage() {
             </div>
           </div>
         </div>
+
+        <section className="mt-14">
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+              Official Merchandise
+            </h3>
+            <p className="mt-2 text-slate-600">
+              Add event merchandise to your cart.
+            </p>
+          </div>
+
+          {loadingMerch ? (
+            <div className="rounded-[24px] bg-white p-6 text-center shadow-lg">
+              Loading merchandise...
+            </div>
+          ) : merchandise.length > 0 ? (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {merchandise.map((item) => (
+                <div key={item.id} className="rounded-[24px] bg-white p-4 shadow-lg">
+                  <img
+                    src={item.image || getCategoryImage(item.category)}
+                    alt={item.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = getCategoryImage(item.category);
+                    }}
+                    className="h-48 w-full rounded-xl object-cover"
+                  />
+
+                  <h4 className="mt-4 text-lg font-bold text-slate-900">
+                    {item.name}
+                  </h4>
+
+                  <p className="mt-2 text-sm text-slate-600">
+                    {item.description || "Official event merchandise"}
+                  </p>
+
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="font-bold text-slate-900">
+                      {formatCurrency(item.price)}
+                    </span>
+                    <span className="text-sm text-slate-500">
+                      Stock: {item.stock}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => handleAddMerchToCart(item)}
+                    disabled={Number(item.stock) <= 0}
+                    className="mt-4 w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                  >
+                    {Number(item.stock) > 0 ? "Add to Cart" : "Out of Stock"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[24px] bg-white p-6 text-center shadow-lg">
+              No merchandise available for this event.
+            </div>
+          )}
+        </section>
+
+        <section className="mt-14">
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+              Recommended Merchandise
+            </h3>
+            <p className="mt-2 text-slate-600">
+              Suggested merchandise based on this event category.
+            </p>
+          </div>
+
+          {loadingRecommendedMerch ? (
+            <div className="rounded-[24px] bg-white p-6 text-center shadow-lg">
+              Loading recommended merchandise...
+            </div>
+          ) : recommendedMerch.length > 0 ? (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {recommendedMerch.map((item) => (
+                <div key={item.id} className="rounded-[24px] bg-white p-4 shadow-lg">
+                  <img
+                    src={item.image || getCategoryImage(item.category)}
+                    alt={item.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = getCategoryImage(item.category);
+                    }}
+                    className="h-48 w-full rounded-xl object-cover"
+                  />
+
+                  <h4 className="mt-4 text-lg font-bold text-slate-900">
+                    {item.name}
+                  </h4>
+
+                  <p className="mt-2 text-sm text-slate-600">
+                    {item.description || "Recommended merchandise"}
+                  </p>
+
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="font-bold text-slate-900">
+                      {formatCurrency(item.price)}
+                    </span>
+                    <span className="text-sm text-slate-500">
+                      Stock: {item.stock}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => handleAddMerchToCart(item)}
+                    disabled={Number(item.stock) <= 0}
+                    className="mt-4 w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                  >
+                    {Number(item.stock) > 0 ? "Add to Cart" : "Out of Stock"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[24px] bg-white p-6 text-center shadow-lg">
+              No recommended merchandise available right now.
+            </div>
+          )}
+        </section>
 
         <section className="mt-14">
           <div className="mb-6">
