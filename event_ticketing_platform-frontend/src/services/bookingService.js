@@ -1,4 +1,6 @@
-const API_BASE_URL = "http://localhost:5001/api/bookings";
+import { API_BASE_URL } from "../config/api";
+
+const BOOKINGS_API_URL = `${API_BASE_URL}/api/bookings`;
 
 const getAuthHeaders = () => ({
   "Content-Type": "application/json",
@@ -17,7 +19,7 @@ const handleUnauthorized = (response) => {
 };
 
 export const createBooking = async (bookingData) => {
-  const response = await fetch(API_BASE_URL, {
+  const response = await fetch(BOOKINGS_API_URL, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(bookingData),
@@ -38,7 +40,7 @@ export const createBooking = async (bookingData) => {
 };
 
 export const fetchAllBookings = async () => {
-  const response = await fetch(API_BASE_URL, {
+  const response = await fetch(BOOKINGS_API_URL, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -56,7 +58,7 @@ export const fetchAllBookings = async () => {
 };
 
 export const fetchBookingsByUser = async (userId) => {
-  const response = await fetch(`${API_BASE_URL}/user/${userId}`, {
+  const response = await fetch(`${BOOKINGS_API_URL}/user/${userId}`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -74,7 +76,7 @@ export const fetchBookingsByUser = async (userId) => {
 };
 
 export const deleteBookingById = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
+  const response = await fetch(`${BOOKINGS_API_URL}/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -93,7 +95,7 @@ export const deleteBookingById = async (id) => {
 };
 
 export const addTicketsToBooking = async (bookingId, quantity) => {
-  const response = await fetch(`${API_BASE_URL}/${bookingId}/add-tickets`, {
+  const response = await fetch(`${BOOKINGS_API_URL}/${bookingId}/add-tickets`, {
     method: "PUT",
     headers: getAuthHeaders(),
     body: JSON.stringify({ quantity }),

@@ -1,11 +1,13 @@
-const API_BASE_URL = "http://localhost:5001/api/analytics";
+import { API_BASE_URL } from "../config/api";
+
+const ANALYTICS_API_URL = `${API_BASE_URL}/api/analytics`;
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
 export const fetchBookingsPerEvent = async () => {
-  const response = await fetch(`${API_BASE_URL}/bookings-per-event`, {
+  const response = await fetch(`${ANALYTICS_API_URL}/bookings-per-event`, {
     headers: getAuthHeaders(),
   });
 
@@ -19,7 +21,7 @@ export const fetchBookingsPerEvent = async () => {
 };
 
 export const fetchTopEvents = async () => {
-  const response = await fetch(`${API_BASE_URL}/top-events`, {
+  const response = await fetch(`${ANALYTICS_API_URL}/top-events`, {
     headers: getAuthHeaders(),
   });
 

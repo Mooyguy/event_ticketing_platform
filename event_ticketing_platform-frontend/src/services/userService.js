@@ -1,4 +1,6 @@
-const API_BASE_URL = "http://localhost:5001/api/users";
+import { API_BASE_URL } from "../config/api";
+
+const USERS_API_URL = `${API_BASE_URL}/api/users`;
 
 const getHeaders = () => ({
   "Content-Type": "application/json",
@@ -6,7 +8,7 @@ const getHeaders = () => ({
 });
 
 export const fetchAllUsers = async () => {
-  const response = await fetch(API_BASE_URL, {
+  const response = await fetch(USERS_API_URL, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -22,7 +24,7 @@ export const fetchAllUsers = async () => {
 };
 
 export const updateUserRole = async (id, role) => {
-  const response = await fetch(`${API_BASE_URL}/${id}/role`, {
+  const response = await fetch(`${USERS_API_URL}/${id}/role`, {
     method: "PUT",
     headers: getHeaders(),
     body: JSON.stringify({ role }),

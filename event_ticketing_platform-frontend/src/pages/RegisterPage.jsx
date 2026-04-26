@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PageHero from "../components/ui/PageHero";
+import { API_BASE_URL } from "../config/api";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -26,7 +27,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:5001/api/auth/register", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

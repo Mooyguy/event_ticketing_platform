@@ -1,5 +1,7 @@
-const API_BASE_URL = "http://localhost:5001/api/merchandise";
-const EVENTS_API_URL = "http://localhost:5001/api/events";
+import { API_BASE_URL } from "../config/api";
+
+const MERCH_API_URL = `${API_BASE_URL}/api/merchandise`;
+const EVENTS_API_URL = `${API_BASE_URL}/api/events`;
 
 const getAdminHeaders = () => ({
     "Content-Type": "application/json",
@@ -7,7 +9,7 @@ const getAdminHeaders = () => ({
 });
 
 export const fetchAllMerchandise = async () => {
-    const response = await fetch(API_BASE_URL);
+    const response = await fetch(MERCH_API_URL);
     const data = await response.json();
 
     if (!response.ok) {
@@ -18,7 +20,7 @@ export const fetchAllMerchandise = async () => {
 };
 
 export const fetchMerchandiseById = async (id) => {
-    const response = await fetch(`${API_BASE_URL}/${id}`);
+    const response = await fetch(`${MERCH_API_URL}/${id}`);
     const data = await response.json();
 
     if (!response.ok) {
@@ -29,7 +31,7 @@ export const fetchMerchandiseById = async (id) => {
 };
 
 export const fetchMerchandiseByEvent = async (eventId) => {
-    const response = await fetch(`${API_BASE_URL}/event/${eventId}`);
+    const response = await fetch(`${MERCH_API_URL}/event/${eventId}`);
     const data = await response.json();
 
     if (!response.ok) {
@@ -51,7 +53,7 @@ export const fetchAllEventsForMerchForm = async () => {
 };
 
 export const createMerchandise = async (merchData) => {
-    const response = await fetch(API_BASE_URL, {
+    const response = await fetch(MERCH_API_URL, {
         method: "POST",
         headers: getAdminHeaders(),
         body: JSON.stringify(merchData),
@@ -67,7 +69,7 @@ export const createMerchandise = async (merchData) => {
 };
 
 export const updateMerchandise = async (id, merchData) => {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
+    const response = await fetch(`${MERCH_API_URL}/${id}`, {
         method: "PUT",
         headers: getAdminHeaders(),
         body: JSON.stringify(merchData),
@@ -83,7 +85,7 @@ export const updateMerchandise = async (id, merchData) => {
 };
 
 export const fetchRecommendedMerchandise = async (category) => {
-    const response = await fetch(`${API_BASE_URL}/recommended/${encodeURIComponent(category)}`);
+    const response = await fetch(`${MERCH_API_URL}/recommended/${encodeURIComponent(category)}`);
     const data = await response.json();
 
     if (!response.ok) {
@@ -94,7 +96,7 @@ export const fetchRecommendedMerchandise = async (category) => {
 };
 
 export const deleteMerchandise = async (id) => {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
+    const response = await fetch(`${MERCH_API_URL}/${id}`, {
         method: "DELETE",
         headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

@@ -1,7 +1,9 @@
-const API_BASE_URL = "http://localhost:5001/api/recommendations";
+import { API_BASE_URL } from "../config/api";
+
+const RECOMMENDATIONS_API_URL = `${API_BASE_URL}/api/recommendations`;
 
 export const fetchRecommendedEvents = async (eventId) => {
-  const response = await fetch(`${API_BASE_URL}/${eventId}`);
+  const response = await fetch(`${RECOMMENDATIONS_API_URL}/${eventId}`);
   const data = await response.json();
 
   if (!response.ok) {

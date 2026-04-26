@@ -1,7 +1,9 @@
-const API_BASE_URL = "http://localhost:5001/api/events";
+import { API_BASE_URL } from "../config/api";
+
+const EVENTS_API_URL = `${API_BASE_URL}/api/events`;
 
 export const fetchAllEvents = async () => {
-  const response = await fetch(API_BASE_URL);
+  const response = await fetch(EVENTS_API_URL);
   const data = await response.json();
 
   if (!response.ok) {
@@ -12,7 +14,7 @@ export const fetchAllEvents = async () => {
 };
 
 export const fetchEventById = async (id) => {
-  const response = await fetch(`http://localhost:5001/api/events/${id}`);
+  const response = await fetch(`${EVENTS_API_URL}/${id}`);
   const data = await response.json();
 
   if (!response.ok) {

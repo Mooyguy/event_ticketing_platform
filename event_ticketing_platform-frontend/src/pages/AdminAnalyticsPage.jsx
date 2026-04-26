@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PageHero from "../components/ui/PageHero";
 import { formatCurrency } from "../utils/formatCurrency";
+import { API_BASE_URL } from "../config/api";
 
 export default function AdminAnalyticsPage() {
   const [analytics, setAnalytics] = useState([]);
@@ -14,7 +15,7 @@ export default function AdminAnalyticsPage() {
         setError("");
 
         const response = await fetch(
-          "http://localhost:5001/api/analytics/bookings-per-event"
+          `${API_BASE_URL}/api/analytics/bookings-per-event`
         );
         const data = await response.json();
 

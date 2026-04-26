@@ -1,4 +1,6 @@
-const API_BASE_URL = "http://localhost:5001/api/merch-orders";
+import { API_BASE_URL } from "../config/api";
+
+const MERCH_ORDERS_API_URL = `${API_BASE_URL}/api/merch-orders`;
 
 const getHeaders = () => ({
   "Content-Type": "application/json",
@@ -6,7 +8,7 @@ const getHeaders = () => ({
 });
 
 export const createMerchOrder = async (orderData) => {
-  const response = await fetch(API_BASE_URL, {
+  const response = await fetch(MERCH_ORDERS_API_URL, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify(orderData),

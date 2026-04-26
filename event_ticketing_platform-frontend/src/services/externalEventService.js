@@ -1,9 +1,11 @@
-const API_BASE_URL = "http://localhost:5001/api/external-events";
+import { API_BASE_URL } from "../config/api";
+
+const EXTERNAL_EVENTS_API_URL = `${API_BASE_URL}/api/external-events`;
 
 export const searchExternalEvents = async (query = "") => {
   const url = query
-    ? `${API_BASE_URL}/search?q=${encodeURIComponent(query)}`
-    : `${API_BASE_URL}/search`;
+    ? `${EXTERNAL_EVENTS_API_URL}/search?q=${encodeURIComponent(query)}`
+    : `${EXTERNAL_EVENTS_API_URL}/search`;
 
   const res = await fetch(url);
   const data = await res.json();
